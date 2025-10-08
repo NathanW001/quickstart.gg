@@ -1,0 +1,15 @@
+#about {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  gap: 10vh;
+}
+
+#copyright {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+}
