@@ -3,6 +3,7 @@ import Set from './subcomponents/Set'
 import { gql, ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import api_response_sample from '../sample_api_response.json'
+import { useState } from 'react';
 
 const BRACKET_QUERY = gql`
 query PhaseGroupSets($phaseGroupId: ID!, $page:Int!, $perPage:Int!){
@@ -53,8 +54,33 @@ function getBracketData(url: string) {
   return api_response_sample
 }
 
+function formatBracketData(api_data: {}): Array<{[key: number]: Array<Object>}> {
+  var ret: Array<{[key: number]: Array<Object>}> = [{},{}]; //kinda a weird def but it's to make typescipt happy
+  (api_data.data.phaseGroup.sets.nodes).map((set_data) => {
+    console.log(set_data)
+    console.log(ret)
+    if (set_data.round < 0 && ret[1][set_data.round] == null) { // in the losers bracket and no sets of that round have been added yet
+      ret[1][set_data.round] = [set_data]
+    }
+    else if (set_data.round < 0) { // in the losers bracket and implicitly a set already is there
+      ret[1][set_data.round].push(set_data)
+    }
+    else if (set_data.round >= 0 && ret[0][set_data.round] == null) { // in the winners bracket and no sets of that round have been added yet
+      ret[0][set_data.round] = [set_data]
+    }
+    else {
+      ret[0][set_data.round].push(set_data)
+    }
+  })
+  return ret
+}
+
 function Bracket() {
+  const [bracketUpperLowerLocation, setBracketUpperLowerLocation] = useState(0);
+  const [bracketRoundLocation, setBracketRoundLocation] = useState(1);
+
   console.log(api_response_sample)
+  console.log(formatBracketData(api_response_sample));
   return (
     <>
       <div id='bracket-name'> Bracket Name </div>
@@ -62,16 +88,12 @@ function Bracket() {
       
       <div className='bracket-matches'>
         {(api_response_sample.data.phaseGroup.sets.nodes).map((set) => {
-          console.log(set.slots[0].entrant.name, "vs", set.slots[1].entrant.name);
-          return <Set player1={set.slots[0].entrant.name} player2={set.slots[1].entrant.name}/>
+          // console.log(set.slots[0].entrant.name, "vs", set.slots[1].entrant.name);
+          return <Set player1={set.slots[0].entrant.name} score1={set.slots[0].standing.stats.score.value} player2={set.slots[1].entrant.name} score2={set.slots[1].standing.stats.score.value} status={0}/>
           // <div>ball</div>
         })}
 
       </div>
-      
-      <Set player1='p1' player2='p2'/>
-      <Set player1='p3' player2='p4'/>
-      <Set player1='p3' player2='p4'/>
     </>
   )
 }
