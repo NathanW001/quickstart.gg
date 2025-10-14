@@ -2,6 +2,7 @@ import './Bracket.css'
 import Set from './subcomponents/Set'
 import { gql, ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
+import api_response_sample from '../sample_api_response.json'
 
 const BRACKET_QUERY = gql`
 query PhaseGroupSets($phaseGroupId: ID!, $page:Int!, $perPage:Int!){
@@ -49,14 +50,25 @@ function initApolloClient(auth: String) : ApolloClient {
 }
 
 function getBracketData(url: string) {
-
+  return api_response_sample
 }
 
 function Bracket() {
+  console.log(api_response_sample)
   return (
     <>
       <div id='bracket-name'> Bracket Name </div>
-      <div id='wave-name'> Wave Name </div>
+      <div id='wave-name'> Pool {api_response_sample.data.phaseGroup.displayIdentifier} </div>
+      
+      <div className='bracket-matches'>
+        {(api_response_sample.data.phaseGroup.sets.nodes).map((set) => {
+          console.log(set.slots[0].entrant.name, "vs", set.slots[1].entrant.name);
+          return <Set player1={set.slots[0].entrant.name} player2={set.slots[1].entrant.name}/>
+          // <div>ball</div>
+        })}
+
+      </div>
+      
       <Set player1='p1' player2='p2'/>
       <Set player1='p3' player2='p4'/>
       <Set player1='p3' player2='p4'/>
